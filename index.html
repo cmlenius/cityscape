@@ -35,8 +35,8 @@
 
         renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.gammaInput = true;
-        renderer.gammaOutput = true;
+        //renderer.gammaInput = true;
+        //renderer.gammaOutput = true;
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
