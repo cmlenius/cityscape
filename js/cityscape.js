@@ -1,121 +1,163 @@
+// Constants
+const GRID_SIZE = 2048;
+const SECTION_SIZE = 512;
+const UNIT = 32;
+
 function generateScene() {
+
     // Floor
-    var planeGeometry = new THREE.PlaneGeometry(5000, 5000, 32);
-    var planeMaterial = new THREE.MeshBasicMaterial({
-        color: 0x111111,
-        side: THREE.DoubleSide
-    });
-    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    let planeGeometry = new THREE.PlaneGeometry(GRID_SIZE, GRID_SIZE, 32);
+    let planeMaterial = new THREE.MeshBasicMaterial({color: 0x111111, side: THREE.DoubleSide});
+    let plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = Math.PI / 2;
     scene.add(plane);
 
-    var hemLight = new THREE.HemisphereLight(0xfffff0, 0x101020, 1.25);
+    let hemLight = new THREE.HemisphereLight(0xfffff0, 0x101020, 1.25);
     hemLight.position.set(0.75, 1, 0.25);
     scene.add(hemLight);
 
-    var buildingGeometry = new THREE.BoxGeometry(1, 1, 1);
+    let subdivision = subDivideCity();
+    //genBuildings();
+    genStreets(subdivision);
+
+    addLight(0.995, 0.5, 0.9, 0, 225, 0);
+}
+
+function subDivideCity() {
+    let divisionX = [];
+    let divisionZ = [];
+
+    let tmp = Math.random() * 384 + 128;
+
+    let i = GRID_SIZE;
+    while (i > tmp) {
+        i -= tmp;
+        divisionX.push(tmp);
+        tmp = Math.random() * 384 + 128;
+    }
+    if (i > 128) divisionX.push(i);
+
+    i = GRID_SIZE;
+    while (i > tmp) {
+        i -= tmp;
+        divisionZ.push(tmp);
+        tmp = Math.random() * 384 + 128;
+    }
+    if (i > 128) divisionZ.push(i);
+
+    return {
+        divisionX: divisionX,
+        divisionZ: divisionZ
+    };
+}
+
+function genStreets(subdivision) {
+    let streetGeometry = new THREE.BoxGeometry(1, 1, 1);
+    let streetMesh = new THREE.Mesh(streetGeometry);
+    let streetsGeometry = new THREE.Geometry();
+
+    let xsum = -GRID_SIZE/2;
+    for (let i=0; i<subdivision.divisionX.length; i++) {
+        xsum += subdivision.divisionX[i];
+        streetMesh.position.x = xsum;
+        streetMesh.position.z = 0;
+        streetMesh.scale.x = UNIT;
+        streetMesh.scale.y = 1;
+        streetMesh.scale.z = GRID_SIZE;
+        streetMesh.updateMatrix();
+        streetsGeometry.merge(streetMesh.geometry, streetMesh.matrix);
+
+    }
+
+    let zsum = -GRID_SIZE/2;
+    for (let i=0; i<subdivision.divisionZ.length; i++) {
+        zsum += subdivision.divisionZ[i];
+        streetMesh.position.x = 0;
+        streetMesh.position.z = zsum;
+        streetMesh.scale.x = GRID_SIZE;
+        streetMesh.scale.y = 1;
+        streetMesh.scale.z = UNIT;
+        streetMesh.updateMatrix();
+        streetsGeometry.merge(streetMesh.geometry, streetMesh.matrix);
+    }
+
+    /*
+    for (let i = -GRID_SIZE / 2; i < GRID_SIZE / 2; i += SECTION_SIZE) {
+        streetMesh.position.x = i;
+        streetMesh.position.z = 0;
+        streetMesh.scale.x = 64;
+        streetMesh.scale.y = 1;
+        streetMesh.scale.z = GRID_SIZE;
+        streetMesh.updateMatrix();
+        streetsGeometry.merge(streetMesh.geometry, streetMesh.matrix);
+
+
+        streetMesh.position.x = 0;
+        streetMesh.position.z = i;
+        streetMesh.scale.x = GRID_SIZE;
+        streetMesh.scale.y = 1;
+        streetMesh.scale.z = 64;
+        streetMesh.updateMatrix();
+        streetsGeometry.merge(streetMesh.geometry, streetMesh.matrix);
+
+    }
+*/
+    let streetsMaterial = new THREE.MeshBasicMaterial({color: 0x555555});
+    let streetsMesh = new THREE.Mesh(streetsGeometry, streetsMaterial);
+    scene.add(streetsMesh);
+}
+
+function genBuildings() {
+    let buildingGeometry = new THREE.BoxGeometry(1, 1, 1);
     buildingGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0.5, 0));
     buildingGeometry.faces.splice(6, 2);
     buildingGeometry.faceVertexUvs[0].splice(6, 2);
     buildingGeometry.faceVertexUvs[0][5][2].set(0, 0);
     buildingGeometry.faceVertexUvs[0][4][2].set(0, 0);
+    let buildingMesh = new THREE.Mesh(buildingGeometry);
+    let cityGeometry = new THREE.Geometry();
+    let buildingsPerSection = 12;
 
-    var buildingMesh = new THREE.Mesh(buildingGeometry);
-    var cityGeometry = new THREE.Geometry();
-    var numOfBuildings = 1000;
 
-        for (var i=0; i < numOfBuildings; i++) {
-            buildingMesh.position.x = Math.floor(Math.random() * 200 - 100) * 20;
-            buildingMesh.position.z = Math.floor(Math.random() * 200 - 100) * 20;
-
-            buildingMesh.scale.x = Math.random() * Math.random() * Math.random() * 30 + 50;
-            buildingMesh.scale.y = Math.random() * 175 + 125;
-            buildingMesh.scale.z = buildingMesh.scale.x;
-
-            buildingMesh.updateMatrix();
-            cityGeometry.merge(buildingMesh.geometry, buildingMesh.matrix);
+    for (let x = -GRID_SIZE / 2; x < GRID_SIZE / 2; x += SECTION_SIZE) {
+        for (let z = -GRID_SIZE / 2; z < GRID_SIZE / 2; z += SECTION_SIZE) {
+            for (let i = 0; i < buildingsPerSection; i++) {
+                let tmp1 = Math.random() * 16 + 48,
+                    tmp2 = Math.random() * 16 + 48;
+                buildingMesh.scale.x = tmp1;
+                buildingMesh.scale.y = Math.random() * 175 + 125;
+                buildingMesh.scale.z = tmp2;
+                buildingMesh.position.x = Math.random() * (SECTION_SIZE - 2 * tmp1) + x + tmp1;
+                buildingMesh.position.z = Math.random() * (SECTION_SIZE - 2 * tmp2) + z + tmp2;
+                buildingMesh.updateMatrix();
+                cityGeometry.merge(buildingMesh.geometry, buildingMesh.matrix);
+            }
         }
+    }
 
-    buildingMesh.position.x = 0;
-    buildingMesh.position.z = 0;
+    /*
+        buildingMesh.position.x = Math.random() * (512 - 128) + 64;
+        buildingMesh.position.z = 0;
 
-    buildingMesh.scale.x = 55;
-    buildingMesh.scale.y = 150;
-    buildingMesh.scale.z = 55;
+        buildingMesh.scale.x = 64;
+        buildingMesh.scale.y = 150;
+        buildingMesh.scale.z = 64;
 
-    buildingMesh.updateMatrix();
-    cityGeometry.merge(buildingMesh.geometry, buildingMesh.matrix);
+        buildingMesh.updateMatrix();
+        cityGeometry.merge(buildingMesh.geometry, buildingMesh.matrix);
 
-    var texture = new THREE.Texture(genCityTexture());
-    texture.anisotropy = renderer.getMaxAnisotropy();
+    */
+    let texture = new THREE.Texture(genCityTexture());
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
     texture.needsUpdate = true;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
 
-    var material = new THREE.MeshLambertMaterial({
+    let material = new THREE.MeshLambertMaterial({
         map: texture,
         vertexColors: THREE.VertexColors
     });
 
-    var cityMesh = new THREE.Mesh(cityGeometry, material);
+    let cityMesh = new THREE.Mesh(cityGeometry, material);
     scene.add(cityMesh);
-
-    addLight(0.995, 0.5, 0.9, 0, 225, 0);
-
-}
-
-function genCityTexture() {
-    var canvas = document.createElement('canvas');
-    canvas.width = 32;
-    canvas.height = 64;
-
-    var context = canvas.getContext("2d");
-    context.fillStyle = '#000000';
-    context.fillRect(0, 0, 32, 64);
-
-    for (var y = 4; y < canvas.height; y += 2) {
-        for (var x = 2; x < canvas.width; x += 2) {
-            context.fillStyle = "#fc5234";
-
-            randVal = Math.random();
-            randVal2 = Math.random();
-
-            if (randVal < 0.3) randVal = 0;
-            if (randVal2 < 0.3) randVal2 = 0;
-
-            context.fillRect(x, y, randVal, randVal2);
-        }
-    }
-
-    var bigCanvas = document.createElement('canvas');
-    bigCanvas.width = 512;
-    bigCanvas.height = 1024;
-    context = bigCanvas.getContext('2d');
-
-    // disable smoothing to avoid blurry effect when scaling
-    context.imageSmoothingEnabled = false;
-    context.webkitImageSmoothingEnabled = false;
-    context.mozImageSmoothingEnabled = false;
-
-    // copy small canvas into big canvas
-    context.drawImage(canvas, 0, 0, bigCanvas.width, bigCanvas.height);
-
-    return bigCanvas;
-}
-
-function addLight(h, s, l, x, y, z) {
-    var textureLoader = new THREE.TextureLoader();
-    var textureFlare0 = textureLoader.load('../textures/lensflare0.png');
-    var textureFlare3 = textureLoader.load('../textures/lensflare3.png');
-
-    var light = new THREE.PointLight(0xffffff, 1.5, 2000);
-    light.color.setHSL(h, s, l);
-    light.position.set(x, y, z);
-    scene.add(light);
-
-    var lensflare = new THREE.Lensflare();
-    lensflare.addElement(new THREE.LensflareElement(textureFlare0, 100, 0, light.color));
-    lensflare.addElement(new THREE.LensflareElement(textureFlare3, 60, 0.6));
-    lensflare.addElement(new THREE.LensflareElement(textureFlare3, 70, 0.7));
-    lensflare.addElement(new THREE.LensflareElement(textureFlare3, 120, 0.9));
-    lensflare.addElement(new THREE.LensflareElement(textureFlare3, 70, 1));
-    light.add(lensflare);
 }
