@@ -22,6 +22,10 @@
 <script src="js/cityscape.js"></script>
 <script>
     var scene, camera, controls, renderer;
+    const GRID_SIZE = 2048;
+    const SECTION_SIZE = 128;
+    const SECTIONS = GRID_SIZE / SECTION_SIZE;
+
 
     init();
     generateScene();

@@ -82,14 +82,12 @@ function genCityTexture() {
 }
 
 
-function genPlaneTexture(gridSize) {
-    let SECTION_SIZE = gridSize / 16,
-        SECTIONS = 16,
-        STEP = 8;
+function genPlaneTexture() {
+    let STEP = 8;
 
     let textureCanvas = document.createElement('canvas');
-    textureCanvas.width = gridSize;
-    textureCanvas.height = gridSize;
+    textureCanvas.width = GRID_SIZE;
+    textureCanvas.height = GRID_SIZE;
 
     let context = textureCanvas.getContext('2d');
     context.imageSmoothingEnabled = false;
@@ -97,24 +95,24 @@ function genPlaneTexture(gridSize) {
     context.mozImageSmoothingEnabled = false;
 
     context.fillStyle = "#182518";
-    context.fillRect(0,0,gridSize,gridSize);
+    context.fillRect(0,0,GRID_SIZE,GRID_SIZE);
 
     // draw street outlines
     for(let i=0; i<SECTIONS; i++){
         context.fillStyle = "#111111";
-        context.fillRect(SECTION_SIZE*i+STEP,0, 2,gridSize);
-        context.fillRect(SECTION_SIZE*(i+1)-STEP-2,0, 2,gridSize);
-        context.fillRect(0,SECTION_SIZE*i+STEP, gridSize,2);
-        context.fillRect(0,SECTION_SIZE*(i+1)-STEP-2, gridSize,2);
+        context.fillRect(SECTION_SIZE*i+STEP,0, 2,GRID_SIZE);
+        context.fillRect(SECTION_SIZE*(i+1)-STEP-2,0, 2,GRID_SIZE);
+        context.fillRect(0,SECTION_SIZE*i+STEP, GRID_SIZE,2);
+        context.fillRect(0,SECTION_SIZE*(i+1)-STEP-2, GRID_SIZE,2);
     }
 
     // draw streets
     for(let i=0; i<SECTIONS; i++){
         context.fillStyle = "#333333";
-        context.fillRect(SECTION_SIZE*i, 0, STEP, gridSize);
-        context.fillRect(SECTION_SIZE*(i+1) - STEP, 0, STEP, gridSize);
-        context.fillRect(0, SECTION_SIZE*i, gridSize, STEP);
-        context.fillRect(0, SECTION_SIZE*(i+1) - STEP, gridSize, STEP);
+        context.fillRect(SECTION_SIZE*i, 0, STEP, GRID_SIZE);
+        context.fillRect(SECTION_SIZE*(i+1) - STEP, 0, STEP, GRID_SIZE);
+        context.fillRect(0, SECTION_SIZE*i, GRID_SIZE, STEP);
+        context.fillRect(0, SECTION_SIZE*(i+1) - STEP, GRID_SIZE, STEP);
     }
 
     return textureCanvas;
