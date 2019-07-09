@@ -7,11 +7,12 @@ function rgbToHex(r, g, b) {
         return hex;
     }
 
-    return '#' + toHex(r) + toHex(g) + toHex(b);
+    return '#' + toHex(Math.floor(r)) + toHex(Math.floor(g)) + toHex(Math.floor(b));
 
 }
 
-function mergeColor(){
+function fract(x) {
+    return x - Math.floor(x);
 }
 
 function genCityTexture() {
@@ -27,6 +28,10 @@ function genCityTexture() {
     context.imageSmoothingEnabled = false;
     context.webkitImageSmoothingEnabled = false;
     context.mozImageSmoothingEnabled = false;
+
+    let winColor = [Math.random()*80 + 175,
+                    Math.random()*80 + 175,
+                    Math.random()*80 + 175];
 
     let isWindowOn = {};
     for (let x = WINX; x < textureCanvas.width; x += WINX) {
@@ -44,7 +49,7 @@ function genCityTexture() {
                 y < WINY*2 || textureCanvas.height - WINY*2 < y ||
                 (5*WINX <= x && x <= 6*WINX)) {
 
-                let randVal = Math.floor(Math.random() * 32);
+                let randVal = Math.floor(Math.random() * 16);
                 context.fillStyle = rgbToHex(randVal,randVal,randVal);
             }
 
@@ -58,27 +63,35 @@ function genCityTexture() {
 
                 // Window On
                 if (isWindowOn[key] >= 0.65) {
-                    let winColor = Math.floor(Math.random() * 32) + 200;
-                    context.fillStyle = rgbToHex(winColor,winColor,winColor);
+                    let randVal = Math.floor(Math.random() * 32);
+                    context.fillStyle = rgbToHex(winColor[0] - randVal,
+                                                 winColor[1] - randVal,
+                                                 winColor[2] - randVal);
                 }
 
                 // Window Off
                 else {
-                    let winColor = Math.floor(Math.random() * 32) + 64 ;
-                    context.fillStyle = rgbToHex(winColor,winColor,winColor);
+                    let randVal = Math.floor(Math.random() * 16) + 32 ;
+                    context.fillStyle = rgbToHex(randVal,randVal,randVal);
                 }
             }
 
             // Wall
             else {
-                let winColor = Math.floor(Math.random() * 32) + 32;
+                let winColor = Math.floor(Math.random() * 16) + 16;
                 context.fillStyle = rgbToHex(winColor,winColor,winColor);
             }
             context.fillRect(x, y, STEP, STEP);
         }
     }
 
-    return textureCanvas;
+    let texture = new THREE.Texture(textureCanvas);
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    texture.needsUpdate = true;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+
+    return texture;
 }
 
 

@@ -27,7 +27,17 @@ function generateScene() {
 }
 
 function genBuildings() {
-    let STREET_LENGTH = 8;
+    let STREET_LENGTH = 8,
+        NUM_OF_MESHES = 8;
+
+    let ids = new Array(NUM_OF_MESHES);
+    for(let i=0; i<SECTIONS; i++){
+        ids[i] = new Array(NUM_OF_MESHES);
+
+        for(let j=0; j<SECTIONS; j++){
+            ids[i][j] = Math.floor(Math.random()*NUM_OF_MESHES);
+        }
+    }
 
     let buildingGeometry = new THREE.BoxGeometry(1, 1, 1);
     buildingGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0.5, 0));
@@ -36,37 +46,44 @@ function genBuildings() {
     buildingGeometry.faceVertexUvs[0][5][2].set(0, 0);
     buildingGeometry.faceVertexUvs[0][4][2].set(0, 0);
 
-    let buildingMesh = new THREE.Mesh(buildingGeometry);
-    let cityGeometry = new THREE.Geometry();
+    let materials = [];
+    for(let i=0; i<NUM_OF_MESHES; i++) {
+        materials[i] = new THREE.MeshLambertMaterial({
+            map: genCityTexture(),
+            vertexColors: THREE.VertexColors
+        });
+    }
+
+    let buildingMeshes = [];
+    for(let i=0; i<NUM_OF_MESHES; i++) {
+        buildingMeshes[i] = new THREE.Mesh(buildingGeometry);
+    }
+
+    let cityGeometries = [];
+    for(let i=0; i<NUM_OF_MESHES; i++) {
+        cityGeometries[i] = new THREE.Geometry;
+    }
 
     for(let i=0; i<SECTIONS; i++){
         for(let j=0; j<SECTIONS; j++){
             let tmpx = Math.random() * 30 + 50,
-                tmpy = Math.random() * 150 + 100,
+                tmpy = Math.random() * 100 + 150,
                 tmpz = Math.random() * 30 + 50;
 
+            let idx = ids[i][j];
+            buildingMeshes[idx].position.x = SECTION_SIZE*i + SECTION_SIZE/2 - GRID_SIZE/2;
+            buildingMeshes[idx].position.z = SECTION_SIZE*j + SECTION_SIZE/2 - GRID_SIZE/2;
+            buildingMeshes[idx].scale.x = tmpx;
+            buildingMeshes[idx].scale.y = tmpy;
+            buildingMeshes[idx].scale.z = tmpz;
 
-            buildingMesh.position.x = SECTION_SIZE*i + SECTION_SIZE/2 - GRID_SIZE/2;
-            buildingMesh.position.z = SECTION_SIZE*j + SECTION_SIZE/2 - GRID_SIZE/2;
-            buildingMesh.scale.x = tmpx;
-            buildingMesh.scale.y = tmpy;
-            buildingMesh.scale.z = tmpz;
-            buildingMesh.updateMatrix();
-            cityGeometry.merge(buildingMesh.geometry, buildingMesh.matrix);
+            buildingMeshes[idx].updateMatrix();
+            cityGeometries[idx].merge(buildingMeshes[idx].geometry, buildingMeshes[idx].matrix);
         }
     }
 
-    let texture = new THREE.Texture(genCityTexture());
-    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    texture.needsUpdate = true;
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-
-    let material = new THREE.MeshLambertMaterial({
-        map: texture,
-        vertexColors: THREE.VertexColors
-    });
-
-    let cityMesh = new THREE.Mesh(cityGeometry, material);
-    scene.add(cityMesh);
+    for(let i=0; i<NUM_OF_MESHES; i++) {
+        let cityMesh = new THREE.Mesh(cityGeometries[i], materials[i]);
+        scene.add(cityMesh);
+    }
 }
