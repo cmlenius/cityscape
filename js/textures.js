@@ -1,6 +1,4 @@
-const WINDOW_SIZE = 64;
-
-function rgbaToHex(r, g, b) {
+function rgbToHex(r, g, b) {
     function toHex(rgb) {
         var hex = Number(rgb).toString(16);
         if (hex.length < 2) {
@@ -13,97 +11,70 @@ function rgbaToHex(r, g, b) {
 
 }
 
-function hslToRgb(h, s, l) {
-    var r, g, b;
-
-    if (s == 0) {
-        r = g = b = l; // achromatic
-    } else {
-        var hue2rgb = function hue2rgb(p, q, t) {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 2) return q;
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-            return p;
-        };
-
-        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        var p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1 / 3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1 / 3);
-    }
-
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), 255];
-}
-
-function genWindow() {
-    let windowCanvas = document.createElement('canvas');
-    windowCanvas.width = WINDOW_SIZE;
-    windowCanvas.height = WINDOW_SIZE;
-
-    let context = windowCanvas.getContext("2d");
-    context.fillStyle = '#ffffff';
-    context.fillRect(0, 0, WINDOW_SIZE, WINDOW_SIZE);
-
-    let red = 0.5 + (Math.random() % 128 / 256) + Math.random() * 10 / 50,
-        blue = red,
-        green = red;
-
-    let average = (red + blue + green) / 3.0,
-        bright = average > 0.5,
-        potential = Math.floor(average * 255);
-
-    if (bright) {
-        for (let x = 2; x < windowCanvas.width; x++) {
-            for (let y = 2; y < windowCanvas.height; y++) {
-                let color = [255, 0, Math.random() * 255, 255],
-                    hue = 0.2 + Math.random() * 100 / 300 + Math.random() * 100 / 300 + Math.random() * 100 / 300,
-                    rgba = hslToRgb(hue, 0.3, 0.5);
-                rgba[3] = Math.random() * potential / 144;
-                context.fillStyle = 'rgba(' + rgba[0] + ',' + rgba[1] + ',' + rgba[2] + ',' + rgba[3] + ')';
-                context.fillRect(x, y, 1, 1);
-            }
-        }
-    }
-
-
-    let repeats = Math.random() * 6 + 1;
-    let height = WINDOW_SIZE + Math.random() * 3 - 1 + Math.random() * 3 - 1;
-
-    for (let x = 2; x < windowCanvas.width; x++) {
-        height = WINDOW_SIZE;
-        height *= Math.random();
-        height *= Math.random();
-        height *= Math.random();
-        height = (WINDOW_SIZE + height) / 2;
-        context.fillStyle = 'rgba(0,0,0,' + Math.random() + ')';
-        //context.fillRect(x, 0, 1, WINDOW_SIZE);
-    }
-
-    return windowCanvas;
+function mergeColor(){
 }
 
 function genCityTexture() {
-    let textureCanvas = document.createElement('canvas');
-    textureCanvas.width = 1024;
-    textureCanvas.height = 1024;
-    let context = textureCanvas.getContext('2d');
+    let STEP = 4,
+        WINX = 10 * STEP,
+        WINY = 8 * STEP;
 
+    let textureCanvas = document.createElement('canvas');
+    textureCanvas.width = 440;
+    textureCanvas.height = 1024;
+
+    let context = textureCanvas.getContext('2d');
     context.imageSmoothingEnabled = false;
     context.webkitImageSmoothingEnabled = false;
     context.mozImageSmoothingEnabled = false;
 
-    for (let x = WINDOW_SIZE; x < textureCanvas.width; x += WINDOW_SIZE) {
-        for (let y = WINDOW_SIZE; y < textureCanvas.height; y += WINDOW_SIZE) {
-            let randVal = Math.random();
-            if (randVal < 0.3) {
-                context.fillRect(x, y, 0, 0)
-            } else {
-                let noise = genWindow();
-                context.drawImage(noise, x, y, 32, 32);
+    let isWindowOn = {};
+    for (let x = WINX; x < textureCanvas.width; x += WINX) {
+        for (let y = WINY; y < textureCanvas.height; y += WINY) {
+            let key = x.toString() + "," + y.toString();
+            isWindowOn[key] = Math.random();
+        }
+    }
+
+    for (let x = 0; x < textureCanvas.width; x += STEP) {
+        for (let y = 0; y < textureCanvas.height; y += STEP) {
+
+            // Edges
+            if (x < WINX || textureCanvas.width - WINX < x ||
+                y < WINY*2 || textureCanvas.height - WINY*2 < y ||
+                (5*WINX <= x && x <= 6*WINX)) {
+
+                let randVal = Math.floor(Math.random() * 32);
+                context.fillStyle = rgbToHex(randVal,randVal,randVal);
             }
+
+            // Windows
+            else if ((4 < x % WINX && x % WINX < 36) &&
+                     (8 < y % WINY && y % WINY < 32)) {
+
+                let tmpx = x - x % WINX,
+                    tmpy = y - y % WINY,
+                    key = tmpx.toString() + "," + tmpy.toString();
+
+                // Window On
+                if (isWindowOn[key] >= 0.65) {
+                    let winColor = Math.floor(Math.random() * 32) + 200;
+                    context.fillStyle = rgbToHex(winColor,winColor,winColor);
+                }
+
+                // Window Off
+                else {
+                    let winColor = Math.floor(Math.random() * 32) + 64 ;
+                    context.fillStyle = rgbToHex(winColor,winColor,winColor);
+                }
+            }
+
+            // Wall
+            else {
+                let winColor = Math.floor(Math.random() * 32) + 32;
+                context.fillStyle = rgbToHex(winColor,winColor,winColor);
+            }
+            context.fillRect(x, y, STEP, STEP);
         }
     }
 
@@ -111,46 +82,44 @@ function genCityTexture() {
 }
 
 
-/*
-function genCityTexture() {
-    let canvas = document.createElement('canvas');
-    canvas.width = 32;
-    canvas.height = 64;
+function genPlaneTexture(gridSize) {
+    let SECTION_SIZE = gridSize / 16,
+        SECTIONS = 16,
+        STEP = 8;
 
-    let context = canvas.getContext("2d");
-    context.fillStyle = '#000000';
-    context.fillRect(0, 0, 32, 64);
+    let textureCanvas = document.createElement('canvas');
+    textureCanvas.width = gridSize;
+    textureCanvas.height = gridSize;
 
-    for (let y = 4; y < canvas.height; y += 2) {
-        for (let x = 2; x < canvas.width; x += 2) {
-            context.fillStyle = "#fc5234";
-
-            let randVal = Math.random();
-            let randVal2 = Math.random();
-
-            if (randVal < 0.3) randVal = 0;
-            if (randVal2 < 0.3) randVal2 = 0;
-
-            context.fillRect(x, y, 1, 1);
-        }
-    }
-
-    let bigCanvas = document.createElement('canvas');
-    bigCanvas.width = 512;
-    bigCanvas.height = 1024;
-    context = bigCanvas.getContext('2d');
-
-    // disable smoothing to avoid blurry effect when scaling
+    let context = textureCanvas.getContext('2d');
     context.imageSmoothingEnabled = false;
     context.webkitImageSmoothingEnabled = false;
     context.mozImageSmoothingEnabled = false;
 
-    // copy small canvas into big canvas
-    context.drawImage(canvas, 0, 0, bigCanvas.width, bigCanvas.height);
+    context.fillStyle = "#182518";
+    context.fillRect(0,0,gridSize,gridSize);
 
-    return bigCanvas;
+    // draw street outlines
+    for(let i=0; i<SECTIONS; i++){
+        context.fillStyle = "#111111";
+        context.fillRect(SECTION_SIZE*i+STEP,0, 2,gridSize);
+        context.fillRect(SECTION_SIZE*(i+1)-STEP-2,0, 2,gridSize);
+        context.fillRect(0,SECTION_SIZE*i+STEP, gridSize,2);
+        context.fillRect(0,SECTION_SIZE*(i+1)-STEP-2, gridSize,2);
+    }
+
+    // draw streets
+    for(let i=0; i<SECTIONS; i++){
+        context.fillStyle = "#333333";
+        context.fillRect(SECTION_SIZE*i, 0, STEP, gridSize);
+        context.fillRect(SECTION_SIZE*(i+1) - STEP, 0, STEP, gridSize);
+        context.fillRect(0, SECTION_SIZE*i, gridSize, STEP);
+        context.fillRect(0, SECTION_SIZE*(i+1) - STEP, gridSize, STEP);
+    }
+
+    return textureCanvas;
+
 }
-*/
 
 function addLight(h, s, l, x, y, z) {
     let textureLoader = new THREE.TextureLoader();
