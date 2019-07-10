@@ -1,5 +1,29 @@
 function generateScene() {
 
+    // Sky
+    /*
+		var geometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
+    var cubeMaterials = [
+        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load( "../textures/sky.png" ), side: THREE.DoubleSide }), //front side
+        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load( '../textures/sky.png' ), side: THREE.DoubleSide }), //back side
+        new THREE.MeshBasicMaterial({ color: "#170098", side: THREE.DoubleSide }), //up side
+        new THREE.MeshBasicMaterial({ color: "#ba3018", side: THREE.DoubleSide }), //down side
+        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load( '../textures/sky.png' ), side: THREE.DoubleSide }), //right side
+        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load( '../textures/sky.png' ), side: THREE.DoubleSide }) //left side
+    ];
+    var cubeMaterial = new THREE.MeshFaceMaterial( cubeMaterials );
+    var cube = new THREE.Mesh( geometry, cubeMaterial );
+    scene.add( cube );
+    */
+
+    var skyGeometry = new THREE.SphereGeometry(7000, 25, 25);
+    var material = new THREE.MeshPhongMaterial({ 
+        map: new THREE.TextureLoader().load( '../textures/sky.png' ),
+    });
+    var sky = new THREE.Mesh(skyGeometry, material);
+    sky.material.side = THREE.BackSide;
+    scene.add(sky);
+    
     // Floor
     let planeTexture = new THREE.Texture(genPlaneTexture());
     planeTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -18,8 +42,8 @@ function generateScene() {
     scene.add(plane);
 
     // Ambient Light
-    let hemLight = new THREE.HemisphereLight(0xfffff0, 0x101020, 1.25);
-    hemLight.position.set(0.75, 1, 0.25);
+    let hemLight = new THREE.HemisphereLight(0xfffff0, 0x101020, 2);
+    hemLight.position.set(0, 1000, 0);
     scene.add(hemLight);
 
     genBuildings();
@@ -46,22 +70,17 @@ function genBuildings() {
     buildingGeometry.faceVertexUvs[0][5][2].set(0, 0);
     buildingGeometry.faceVertexUvs[0][4][2].set(0, 0);
 
-    let materials = [];
+    let buildingMeshes = [],
+        cityGeometries  = [],
+        materials = [];
+
     for(let i=0; i<NUM_OF_MESHES; i++) {
+        buildingMeshes[i] = new THREE.Mesh(buildingGeometry);
+        cityGeometries[i] = new THREE.Geometry;
         materials[i] = new THREE.MeshLambertMaterial({
             map: genCityTexture(),
             vertexColors: THREE.VertexColors
         });
-    }
-
-    let buildingMeshes = [];
-    for(let i=0; i<NUM_OF_MESHES; i++) {
-        buildingMeshes[i] = new THREE.Mesh(buildingGeometry);
-    }
-
-    let cityGeometries = [];
-    for(let i=0; i<NUM_OF_MESHES; i++) {
-        cityGeometries[i] = new THREE.Geometry;
     }
 
     for(let i=0; i<SECTIONS; i++){
