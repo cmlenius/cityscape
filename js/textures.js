@@ -29,15 +29,24 @@ function genCityTexture() {
     context.webkitImageSmoothingEnabled = false;
     context.mozImageSmoothingEnabled = false;
 
-    let winColor = [Math.random()*80 + 175,
-                    Math.random()*80 + 175,
-                    Math.random()*80 + 175];
+    let winColor = [Math.random()*55 + 180,
+                    Math.random()*55 + 180,
+                    Math.random()*45 + 190];
 
-    let isWindowOn = {};
+    let brightness = {};
     for (let x = WINX; x < textureCanvas.width; x += WINX) {
         for (let y = WINY; y < textureCanvas.height; y += WINY) {
-            let key = x.toString() + "," + y.toString();
-            isWindowOn[key] = Math.random();
+            let key = x.toString() + "," + y.toString(),
+                height = y/textureCanvas.height;
+            if (height < 0.25) {
+                brightness[key] = Math.random() + 0.1;
+            } else if (height < 0.5) {
+                brightness[key] = Math.random();
+            } else if (height < 0.75) {
+                brightness[key] = Math.random() - 0.1;
+            } else {
+                brightness[key] = Math.random() * Math.random();
+            }
         }
     }
 
@@ -47,38 +56,39 @@ function genCityTexture() {
             // Edges
             if (x < WINX || textureCanvas.width - WINX < x ||
                 y < WINY*2 || textureCanvas.height - WINY*2 < y ||
-                (5*WINX <= x && x <= 6*WINX)) {
+                (textureCanvas.width/2 - WINX/2 < x && x < textureCanvas.width/2 + WINX/2)) {
 
-                let randVal = Math.floor(Math.random() * 16);
+                let randVal = Math.floor(Math.random() * 12);
                 context.fillStyle = rgbToHex(randVal,randVal,randVal);
             }
 
             // Windows
-            else if ((4 < x % WINX && x % WINX < 36) &&
-                     (8 < y % WINY && y % WINY < 32)) {
-
+            else if ((STEP < x % WINX && x % WINX < WINX - STEP) &&
+                     (2*STEP < y % WINY && y % WINY < WINY - 2*STEP)) {
                 let tmpx = x - x % WINX,
                     tmpy = y - y % WINY,
                     key = tmpx.toString() + "," + tmpy.toString();
 
-                // Window On
-                if (isWindowOn[key] >= 0.65) {
-                    let randVal = Math.floor(Math.random() * 32);
-                    context.fillStyle = rgbToHex(winColor[0] - randVal,
-                                                 winColor[1] - randVal,
-                                                 winColor[2] - randVal);
-                }
-
-                // Window Off
-                else {
-                    let randVal = Math.floor(Math.random() * 16) + 32 ;
+                if (brightness[key] >= 0.75) {
+                    let randVal = Math.floor(Math.random() * 75);
+                    context.fillStyle = rgbToHex(Math.min(255, winColor[0] + randVal),
+                                                 Math.min(255, winColor[1] + randVal),
+                                                 Math.min(255, winColor[2] + randVal));
+                } else if (brightness[key] >= 0.5) {
+                    let randVal = Math.floor(Math.random() * 8) + 48 ;
+                    context.fillStyle = rgbToHex(randVal,randVal,randVal);
+                } else if (brightness[key] >= 0.25) {
+                    let randVal = Math.floor(Math.random() * 8) + 36 ;
+                    context.fillStyle = rgbToHex(randVal,randVal,randVal);
+                } else {
+                    let randVal = Math.floor(Math.random() * 8) + 24 ;
                     context.fillStyle = rgbToHex(randVal,randVal,randVal);
                 }
             }
 
             // Wall
             else {
-                let winColor = Math.floor(Math.random() * 16) + 16;
+                let winColor = Math.floor(Math.random() * 8) + 16;
                 context.fillStyle = rgbToHex(winColor,winColor,winColor);
             }
             context.fillRect(x, y, STEP, STEP);
