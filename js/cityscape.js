@@ -1,29 +1,13 @@
 function generateScene() {
 
-    // Sky
-    /*
-		var geometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
-    var cubeMaterials = [
-        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load( "../textures/sky.png" ), side: THREE.DoubleSide }), //front side
-        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load( '../textures/sky.png' ), side: THREE.DoubleSide }), //back side
-        new THREE.MeshBasicMaterial({ color: "#170098", side: THREE.DoubleSide }), //up side
-        new THREE.MeshBasicMaterial({ color: "#ba3018", side: THREE.DoubleSide }), //down side
-        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load( '../textures/sky.png' ), side: THREE.DoubleSide }), //right side
-        new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load( '../textures/sky.png' ), side: THREE.DoubleSide }) //left side
-    ];
-    var cubeMaterial = new THREE.MeshFaceMaterial( cubeMaterials );
-    var cube = new THREE.Mesh( geometry, cubeMaterial );
-    scene.add( cube );
-    */
-
-    var skyGeometry = new THREE.SphereGeometry(7000, 25, 25);
-    var material = new THREE.MeshPhongMaterial({ 
+    var skyGeometry = new THREE.SphereGeometry(50000, 25, 25);
+    var material = new THREE.MeshPhongMaterial({
         map: new THREE.TextureLoader().load( '../textures/sky.png' ),
     });
     var sky = new THREE.Mesh(skyGeometry, material);
     sky.material.side = THREE.BackSide;
     scene.add(sky);
-    
+
     // Floor
     let planeTexture = new THREE.Texture(genPlaneTexture());
     planeTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();

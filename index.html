@@ -19,59 +19,59 @@
     </style>
 </head>
 <body>
-<script src="js/three.js"></script>
-<script src="js/OrbitControls.js"></script>
-<script src="js/FlyControls.js"></script>
-<script src="js/Lensflare.js"></script>
-<script src="js/textures.js"></script>
-<script src="js/cityscape.js"></script>
-<script>
- var scene, camera, controls, renderer;
- const GRID_SIZE = 2048;
- const SECTION_SIZE = 128;
- const SECTIONS = GRID_SIZE / SECTION_SIZE;
+    <script src="js/three.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/FlyControls.js"></script>
+    <script src="js/Lensflare.js"></script>
+    <script src="js/textures.js"></script>
+    <script src="js/cityscape.js"></script>
+    <script>
+     var scene, camera, controls, renderer;
+     const GRID_SIZE = 16384;
+     const SECTION_SIZE = 128;
+     const SECTIONS = GRID_SIZE / SECTION_SIZE;
 
 
- init();
- generateScene();
- render();
+     init();
+     generateScene();
+     render();
 
- function init() {
-     scene = new THREE.Scene();
-     // scene.background = new THREE.Color(0x000044);
+     function init() {
+         scene = new THREE.Scene();
+         // scene.background = new THREE.Color(0x000044);
 
-     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 20000);
-     camera.position.set(300, 250, 600);
+         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000);
+         camera.position.set(300, 250, 600);
 
-     renderer = new THREE.WebGLRenderer({alpha: true});
-     renderer.setSize(window.innerWidth, window.innerHeight);
-     //renderer.gammaInput = true;
-     //renderer.gammaOutput = true;
+         renderer = new THREE.WebGLRenderer({alpha: true});
+         renderer.setSize(window.innerWidth, window.innerHeight);
+         //renderer.gammaInput = true;
+         //renderer.gammaOutput = true;
 
-     controls = new THREE.OrbitControls(camera, renderer.domElement);
-     controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-     controls.dampingFactor = 0.75;
-     controls.screenSpacePanning = false;
-     controls.minDistance = 100;
-     controls.maxDistance = 5000;
-     controls.maxPolarAngle = Math.PI / 2 - 0.1;
+         controls = new THREE.OrbitControls(camera, renderer.domElement);
+         controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+         controls.dampingFactor = 0.75;
+         controls.screenSpacePanning = false;
+         controls.minDistance = 100;
+         controls.maxDistance = 5000;
+         controls.maxPolarAngle = Math.PI / 2 - 0.1;
 
-     document.body.appendChild(renderer.domElement);
-     window.addEventListener('resize', onWindowResize, false);
- }
+         document.body.appendChild(renderer.domElement);
+         window.addEventListener('resize', onWindowResize, false);
+     }
 
- function render() {
-     requestAnimationFrame(render);
-     controls.update();
-     renderer.render(scene, camera);
- }
+     function render() {
+         requestAnimationFrame(render);
+         controls.update();
+         renderer.render(scene, camera);
+     }
 
- function onWindowResize() {
-     camera.aspect = window.innerWidth / window.innerHeight;
-     camera.updateProjectionMatrix();
-     renderer.setSize( window.innerWidth, window.innerHeight );
- }
+     function onWindowResize() {
+         camera.aspect = window.innerWidth / window.innerHeight;
+         camera.updateProjectionMatrix();
+         renderer.setSize( window.innerWidth, window.innerHeight );
+     }
 
-</script>
+    </script>
 </body>
 </html>
