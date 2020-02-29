@@ -46,7 +46,7 @@
 <body>
 
 
-    <div id="controls"><b>WASD</b> move, <b>R|F</b> up | down, <b>Q|E</b> roll, <b>up|down</b> pitch, <b>left|right</b> yaw </div>
+    <div id="controls"><b>WASD</b> move <b>R/F</b> up | down <b>Q/E</b> roll <b>up/down</b> pitch <b>left/right</b> yaw </div>
     <script src="js/three.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/FirstPersonControls.js"></script>
@@ -70,7 +70,7 @@
          scene = new THREE.Scene();
          scene.background = new THREE.Color(0x000011);
 
-         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 4096);
+         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 14096);
          camera.position.y += 150;
 
          renderer = new THREE.WebGLRenderer({alpha: true});
