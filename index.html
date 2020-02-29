@@ -9,27 +9,57 @@
          //background: -moz-linear-gradient(top, rgba(0,0,0,1) 0%, rgba(4,18,24,1) 50%, rgba(75,61,78,1) 100%);
          //background: -o-linear-gradient(top, rgba(0,0,0,1) 0%, rgba(4,18,24,1) 50%, rgba(75,61,78,1) 100%);
          //background: -webkit-linear-gradient(top, rgba(0,0,0,1) 0%, rgba(4,18,24,1) 15%, rgba(75,61,78,1) 30%);
-         //background: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(4,18,24,1) 15%, rgba(75,61,78,1) 30%)
+         //background: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(4,18,24,1) 15%, rgba(75,61,78,1) 30%);
+         height: 100%;
+         width: 100%;
+         overflow: hidden;
+     }
+     
+     #controls {
+         position: absolute;
+	     top: 0px;
+	     width: 100%;
+	     padding: 10px;
+	     box-sizing: border-box;
+	     text-align: center;
+	     z-index: 1;
+         color: red;
+            
+	     user-select: none;
+	     -moz-user-select: none;
+	     -webkit-user-select: none;
+	     -ms-user-select: none;
+	     pointer-events: none;
+     }
+
+     b {
+         color: white;
      }
 
      canvas {
+         z-index: -1;
          width: 100%;
          height: 100%
      }
     </style>
 </head>
 <body>
+
+
+    <div id="controls"><b>WASD</b> move, <b>R|F</b> up | down, <b>Q|E</b> roll, <b>up|down</b> pitch, <b>left|right</b> yaw </div>
     <script src="js/three.js"></script>
     <script src="js/OrbitControls.js"></script>
+    <script src="js/FirstPersonControls.js"></script>
     <script src="js/FlyControls.js"></script>
     <script src="js/Lensflare.js"></script>
     <script src="js/textures.js"></script>
     <script src="js/cityscape.js"></script>
     <script>
      var scene, camera, controls, renderer;
-     const GRID_SIZE = 16384;
+     const GRID_SIZE = 2048;
      const SECTION_SIZE = 128;
      const SECTIONS = GRID_SIZE / SECTION_SIZE;
+     var lastTime = performance.now();
 
 
      init();
@@ -38,16 +68,24 @@
 
      function init() {
          scene = new THREE.Scene();
-         // scene.background = new THREE.Color(0x000044);
+         scene.background = new THREE.Color(0x000022);
 
-         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000);
-         camera.position.set(300, 250, 600);
+         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+         camera.position.y += 150;
 
          renderer = new THREE.WebGLRenderer({alpha: true});
          renderer.setSize(window.innerWidth, window.innerHeight);
          //renderer.gammaInput = true;
          //renderer.gammaOutput = true;
 
+         controls = new THREE.FlyControls(camera, renderer.domElement);
+         controls.movementSpeed = 50;
+         controls.domElement = renderer.domElement;
+         controls.rollSpeed = Math.PI/24;
+         controls.autoForward = false;
+         controls.dragToLook = false;
+
+         /*
          controls = new THREE.OrbitControls(camera, renderer.domElement);
          controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
          controls.dampingFactor = 0.75;
@@ -55,6 +93,7 @@
          controls.minDistance = 100;
          controls.maxDistance = 5000;
          controls.maxPolarAngle = Math.PI / 2 - 0.1;
+         */
 
          document.body.appendChild(renderer.domElement);
          window.addEventListener('resize', onWindowResize, false);
@@ -62,7 +101,9 @@
 
      function render() {
          requestAnimationFrame(render);
-         controls.update();
+         let time = performance.now() / 1000;
+         controls.update(time - lastTime);
+         lastTime = time;
          renderer.render(scene, camera);
      }
 
